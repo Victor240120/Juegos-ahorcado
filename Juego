@@ -1,0 +1,284 @@
+import tkinter as tk
+from tkinter import messagebox
+import random
+import pygame
+from PIL import Image, ImageTk
+
+class JuegoAhorcado:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("El Ahorcado")
+        self.master.geometry("700x500")
+        self.master.configure(bg="lightblue")
+
+        pygame.mixer.init()
+
+        self.sonido_correcto = "piano.mp3"
+        self.sonido_error = "error.wav"
+        self.palabras = ["PYTHON", "PROGRAMACION", "JUEGO", "AHORCADO", "COMPUTADORA"]
+        self.palabra_secreta = ""
+        self.palabra_oculta = []
+        self.intentos = 6
+        self.partes_muñeco = []
+        self.sonido_piano_reproduciendo = False
+
+        self.usuario = "usuario1"
+        self.password = "clave123"
+        self.menu_login()
+
+    def reproducir_sonido(self, archivo, bucle=False):
+        """Reproduce un sonido específico."""
+        try:
+            if bucle:
+                pygame.mixer.music.load(archivo)
+                pygame.mixer.music.play(-1)  # -1 para bucle continuo
+                self.sonido_piano_reproduciendo = True
+            else:
+                sonido = pygame.mixer.Sound(archivo)
+                sonido.play()
+        except pygame.error as e:
+            print(f"Error al reproducir el sonido: {e}")
+
+    def detener_sonido(self):
+        """Detiene cualquier sonido en reproducción."""
+        pygame.mixer.music.stop()
+        self.sonido_piano_reproduciendo = False
+
+    def menu_login(self):
+        """Pantalla de Login (iniciar sesión)."""
+        self.limpiar_ventana()
+
+        # Fondo del login
+        self.fondo = Image.open("juego.jpg")
+        self.fondo = self.fondo.resize((700, 500))  
+        self.fondo_imagen = ImageTk.PhotoImage(self.fondo)
+        
+        label_fondo = tk.Label(self.master, image=self.fondo_imagen)
+        label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+
+        tk.Label(self.master, text="Inicio de sesión", font=("Arial", 24, "bold"), bg="lightblue").pack(pady=20)
+
+        tk.Label(self.master, text="Nombre de usuario:", font=("Arial", 14), bg="lightblue").pack(pady=5)
+        self.entry_usuario = tk.Entry(self.master, font=("Arial", 14))
+        self.entry_usuario.pack(pady=5)
+
+        tk.Label(self.master, text="Contraseña:", font=("Arial", 14), bg="lightblue").pack(pady=5)
+        self.entry_password = tk.Entry(self.master, show="*", font=("Arial", 14))
+        self.entry_password.pack(pady=5)
+
+        btn_login = tk.Button(self.master, text="Iniciar sesión", font=("Arial", 14), bg="green", fg="white", command=self.login)
+        btn_login.pack(pady=20)
+
+        btn_registrar = tk.Button(self.master, text="Crear cuenta nueva", font=("Arial", 14), bg="blue", fg="white", command=self.registrar_usuario)
+        btn_registrar.pack(pady=5)
+
+        btn_salir = tk.Button(self.master, text="Salir", font=("Arial", 14), bg="red", fg="white", command=self.master.quit)
+        btn_salir.pack(pady=5)
+
+    def login(self):
+        """Valida el login con el usuario y la contraseña."""
+        usuario_ingresado = self.entry_usuario.get()
+        password_ingresado = self.entry_password.get()
+
+        if usuario_ingresado == self.usuario and password_ingresado == self.password:
+            self.menu_principal()
+        else:
+            messagebox.showerror("Error de Login", "Nombre de usuario o contraseña incorrectos.")
+
+    def registrar_usuario(self):
+        """Pantalla de registro de usuario."""
+        self.limpiar_ventana()
+
+        # Fondo para el registro
+        self.fondo = Image.open("juego.jpg")
+        self.fondo = self.fondo.resize((700, 500))  
+        self.fondo_imagen = ImageTk.PhotoImage(self.fondo)
+        
+        label_fondo = tk.Label(self.master, image=self.fondo_imagen)
+        label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+
+        tk.Label(self.master, text="Registro de usuario", font=("Arial", 24, "bold"), bg="lightblue").pack(pady=20)
+
+        tk.Label(self.master, text="Nombre:", font=("Arial", 14), bg="lightblue").pack(pady=5)
+        self.entry_nombre = tk.Entry(self.master, font=("Arial", 14))
+        self.entry_nombre.pack(pady=5)
+
+        tk.Label(self.master, text="Edad:", font=("Arial", 14), bg="lightblue").pack(pady=5)
+        self.entry_edad = tk.Entry(self.master, font=("Arial", 14))
+        self.entry_edad.pack(pady=5)
+
+        tk.Label(self.master, text="Usuario:", font=("Arial", 14), bg="lightblue").pack(pady=5)
+        self.entry_usuario_registro = tk.Entry(self.master, font=("Arial", 14))
+        self.entry_usuario_registro.pack(pady=5)
+
+        tk.Label(self.master, text="Contraseña:", font=("Arial", 14), bg="lightblue").pack(pady=5)
+        self.entry_password_registro = tk.Entry(self.master, show="*", font=("Arial", 14))
+        self.entry_password_registro.pack(pady=5)
+
+        btn_guardar = tk.Button(self.master, text="Guardar cuenta", font=("Arial", 14), bg="green", fg="white", command=self.guardar_usuario)
+        btn_guardar.pack(pady=20)
+
+        btn_volver_login = tk.Button(self.master, text="Volver al login", font=("Arial", 14), bg="red", fg="white", command=self.menu_login)
+        btn_volver_login.pack(pady=5)
+
+    def guardar_usuario(self):
+        """Guarda el nuevo usuario."""
+        nombre = self.entry_nombre.get()
+        edad = self.entry_edad.get()
+        usuario = self.entry_usuario_registro.get()
+        contraseña = self.entry_password_registro.get()
+
+        if not nombre or not edad or not usuario or not contraseña:
+            messagebox.showerror("Error", "Todos los campos son obligatorios.")
+            return
+        
+        # Aquí se puede guardar el usuario a un archivo o base de datos, pero por ahora se guarda en la variable
+        self.usuario = usuario
+        self.password = contraseña
+
+        messagebox.showinfo("Registro exitoso", f"¡Cuenta de {nombre} creada con éxito!")
+        self.menu_login()
+
+    def menu_principal(self):
+        """Carga el menú principal del juego."""
+        self.limpiar_ventana()
+
+        # Fondo para el menú principal
+        self.fondo = Image.open("juego.jpg")  # Fondo para el menú principal
+        self.fondo = self.fondo.resize((700, 500))  
+        self.fondo_imagen = ImageTk.PhotoImage(self.fondo)
+        
+        label_fondo = tk.Label(self.master, image=self.fondo_imagen)
+        label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+
+        if not self.sonido_piano_reproduciendo:
+            self.reproducir_sonido(self.sonido_correcto, bucle=True)
+
+        tk.Label(self.master, text="¡Bienvenidos a mi videojuego!", font=("Arial", 18), bg="lightblue").pack(pady=20)
+        tk.Label(self.master, text="EL AHORCADO", font=("Arial", 24, "bold"), bg="lightblue").pack(pady=10)
+
+        btn_iniciar = tk.Button(
+            self.master, text="Iniciar partida", font=("Arial", 14), bg="blue", fg="white", 
+            command=self.iniciar_juego
+        )
+        btn_iniciar.pack(pady=10)
+
+        btn_salir = tk.Button(
+            self.master, text="Abandonar partida", font=("Arial", 14), bg="red", fg="white", 
+            command=self.master.quit
+        )
+        btn_salir.pack(pady=10)
+
+    def iniciar_juego(self):
+        """Inicia el juego."""
+        self.detener_sonido()
+        self.limpiar_ventana()
+
+        # Cargar y mostrar la imagen de fondo cuando se inicie el juego
+        self.fondo = Image.open("ia.png")  # Fondo para el juego
+        self.fondo = self.fondo.resize((700, 500))
+        self.fondo_imagen = ImageTk.PhotoImage(self.fondo)
+        
+        label_fondo = tk.Label(self.master, image=self.fondo_imagen)
+        label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Selección aleatoria de palabra
+        self.palabra_secreta = random.choice(self.palabras)
+        self.palabra_oculta = ["_"] * len(self.palabra_secreta)
+
+        self.label_palabra = tk.Label(self.master, text=" ".join(self.palabra_oculta), font=("Arial", 24), bg="lightblue")
+        self.label_palabra.pack(pady=20)
+
+        self.label_intentos = tk.Label(self.master, text=f"Intentos restantes: {self.intentos}", font=("Arial", 14), bg="lightblue")
+        self.label_intentos.pack(pady=10)
+
+        # Aumentar el tamaño del lienzo y moverlo al centro
+        self.canvas = tk.Canvas(self.master, width=200, height=200, bg="white")  # Tamaño mayor
+        self.canvas.pack(pady=10)
+
+        self.iniciar_muñeco()
+
+        self.entry_letra = tk.Entry(self.master, font=("Arial", 14))
+        self.entry_letra.pack(pady=10)
+
+        btn_adivinar_letra = tk.Button(self.master, text="Adivinar letra", font=("Arial", 14), bg="blue", fg="white", command=self.adivinar_letra)
+        btn_adivinar_letra.pack(pady=5)
+
+        btn_adivinar_palabra = tk.Button(self.master, text="Adivinar palabra", font=("Arial", 14), bg="green", fg="white", command=self.adivinar_palabra)
+        btn_adivinar_palabra.pack(pady=5)
+
+    def limpiar_ventana(self):
+        """Limpia la ventana."""
+        for widget in self.master.winfo_children():
+            widget.destroy()
+
+    def iniciar_muñeco(self):
+        """Inicializa el muñeco de ahorcado con la cuerda más corta y la cabeza nivelada."""
+        self.canvas.create_line(60, 170, 120, 170, width=3)  # Base
+        self.canvas.create_line(90, 170, 90, 30, width=3)   # Poste más largo
+        self.canvas.create_line(90, 30, 150, 30, width=3)    # Barra superior
+        self.canvas.create_line(150, 30, 150, 50, width=3)   # Cuerda más corta
+
+    def dibujar_muñeco(self):
+        """Dibuja el muñeco según el número de intentos."""
+        if self.intentos == 5:
+            self.canvas.create_oval(130, 50, 170, 90, width=3)  # Cabeza nivelada con la cuerda
+        elif self.intentos == 4:
+            self.canvas.create_line(150, 90, 150, 130, width=3)  # Cuerpo
+        elif self.intentos == 3:
+            self.canvas.create_line(150, 90, 130, 120, width=3)  # Brazo izquierdo
+        elif self.intentos == 2:
+            self.canvas.create_line(150, 90, 170, 120, width=3)  # Brazo derecho
+        elif self.intentos == 1:
+            self.canvas.create_line(150, 130, 130, 160, width=3)  # Pierna izquierda
+        elif self.intentos == 0:
+            self.canvas.create_line(150, 130, 170, 160, width=3)  # Pierna derecha
+
+    def adivinar_letra(self):
+        """Lógica para adivinar una letra."""
+        letra = self.entry_letra.get().upper()
+        if len(letra) != 1 or not letra.isalpha():
+            messagebox.showerror("Error", "Introduce solo una letra.")
+            return
+
+        if letra in self.palabra_secreta:
+            for i in range(len(self.palabra_secreta)):
+                if self.palabra_secreta[i] == letra:
+                    self.palabra_oculta[i] = letra
+            self.label_palabra.config(text=" ".join(self.palabra_oculta))
+        else:
+            self.intentos -= 1
+            self.label_intentos.config(text=f"Intentos restantes: {self.intentos}")
+            self.dibujar_muñeco()
+
+        self.entry_letra.delete(0, tk.END)
+
+        if "_" not in self.palabra_oculta:
+            messagebox.showinfo("Ganaste", "¡Ganaste! Adivinaste la palabra.")
+            self.menu_principal()
+        elif self.intentos == 0:
+            messagebox.showinfo("Perdiste", "Perdiste. La palabra era " + self.palabra_secreta)
+            self.menu_principal()
+
+    def adivinar_palabra(self):
+        """Lógica para adivinar la palabra completa."""
+        palabra_adivinada = self.entry_letra.get().upper()
+        if len(palabra_adivinada) != len(self.palabra_secreta):
+            messagebox.showerror("Error", "Introduce una palabra de la misma longitud.")
+            return
+
+        if palabra_adivinada == self.palabra_secreta:
+            self.label_palabra.config(text=self.palabra_secreta)
+            messagebox.showinfo("Ganaste", "¡Ganaste! Adivinaste la palabra.")
+            self.menu_principal()
+        else:
+            self.intentos -= 1
+            self.label_intentos.config(text=f"Intentos restantes: {self.intentos}")
+            self.dibujar_muñeco()
+
+        self.entry_letra.delete(0, tk.END)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    juego = JuegoAhorcado(root)
+    root.mainloop()
